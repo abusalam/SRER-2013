@@ -9,6 +9,7 @@ class DB {
 	public $conn;
 	public $result;
 	public $Debug;
+	private $NoResult;
 	private function do_connect()
 	{
 		//$this->Debug=1;
@@ -19,6 +20,7 @@ class DB {
 		}
 		//mysql_select_db('damncool_BSKP') or die('Cannot select database');
 		mysql_select_db(MySQL_DB) or die('Cannot select database (database.php): '.mysql_error()."<br><br>");
+		$this->NoResult=1;
 	}
 	public function do_ins_query($querystr)
 	{
@@ -32,6 +34,7 @@ class DB {
 				echo $message;	
 			return 0;
 		}
+		$this->NoResult=1;
 		return mysql_affected_rows($this->conn);
 	}
 	
@@ -44,6 +47,7 @@ class DB {
 				echo mysql_error($this->conn);
 			return 0;
 		}
+		$this->NoResult=0;
 		return mysql_num_rows($this->result);
 	}
 
@@ -90,10 +94,8 @@ class DB {
 	
 	public function ShowTable($QueryString)
 	{ 
-		// Connecting, selecting database 
-		$this->do_connect();
 		// Performing SQL query 
-		$this->result = mysql_query($QueryString,$this->conn);  
+		$this->do_sel_query($QueryString);  
 		// Printing results in HTML 
 		echo '<table rules="all" frame="box" width="100%" cellpadding="5" cellspacing="1">'; 
 		$i=0;
@@ -114,18 +116,13 @@ class DB {
 			$i++;
 		} 
 		echo "</table>\n"; 
-		// Free resultset 
-		mysql_free_result($this->result);  
-		// Closing connection 
-		mysql_close($this->conn); 
+		$this->do_close();
 		return ($i);
 	}
 	public function ShowTableKiosk($QueryString)
 	{ 
 		// Connecting, selecting database 
-		$this->do_connect();
-		// Performing SQL query 
-		$this->result = mysql_query($QueryString,$this->conn);  
+		$this->do_sel_query($QueryString);  
 		// Printing results in HTML 
 		echo '<table rules="all" frame="box" width="100%" cellpadding="5" cellspacing="1" border="1">'; 
 		echo '<tr><td colspan="2" style="background-color:#F4A460;height:3px;border: 1px solid black;"></td></tr>'; 
@@ -145,18 +142,17 @@ class DB {
 			echo '<tr><td colspan="2" style="background-color:#F4A460;height:3px;border: 1px solid black;"></td></tr>'; 
 		} 
 		echo "</table>\n"; 
-		// Free resultset 
-		mysql_free_result($this->result);  
-		// Closing connection 
-		mysql_close($this->conn); 
+		$this->do_close();
 		return ($i);
 	}
 	public function do_close()
 	{
 		// Free resultset 
-		mysql_free_result($this->result);  
+		if(!$this->NoResult)
+		mysql_free_result($this->result);		
 		// Closing connection 
 		mysql_close($this->conn);
+		//echo "<br />LastQuery: ".$LastQuery;
 	}
 		/*function EditTableV($QueryString)
 	{ 
@@ -239,7 +235,7 @@ class DB {
 	}*/
 	function EditTableV2($QueryString)
 	{ 
-		$this->result = mysql_query($QueryString,$this->conn);
+		$this->do_sel_query($QueryString);
 		echo "Total Records: ".mysql_num_rows($this->result)."\n<br />";
 		// Printing results in HTML 
 		echo '<form name="frmData" method="post" action="'.htmlspecialchars($_SERVER['PHP_SELF'])
@@ -253,7 +249,7 @@ class DB {
 				." Where ".mysql_field_name($this->result,0)."=".intval($_REQUEST['Delete'])." LIMIT 1;";
 			//echo $Query;
 			$Data->do_ins_query($Query);
-			$this->result = mysql_query($QueryString,$this->conn);
+			$this->do_sel_query($QueryString);
 			//echo 'Query failed: ' . mysql_error();  
 		}
 		if(isset($_POST[mysql_field_name($this->result,$col)]))
@@ -284,7 +280,7 @@ class DB {
 				}
 				$col++;
 			}
-			$this->result = mysql_query($QueryString,$this->conn); 
+			$this->do_sel_query($QueryString); 
 			//echo $Query."<br />";
 		}
 		//Print Collumn Names
@@ -395,7 +391,7 @@ class DB {
 					$col++;
 					//echo "Col:".$col." ".$FieldName."<br />";
 				}
-				$this->result = mysql_query($QueryString,$this->conn); 
+				$this->do_sel_query($QueryString); 
 				//echo $Query."<br />";
 			}
 			$i=0;
@@ -491,7 +487,7 @@ class DB {
 				}
 				$col++;
 			}
-			$this->result = mysql_query($QueryString,$this->conn); 
+			$this->do_sel_query($QueryString); 
 			echo $Query."<br />";
 		}
 		//Print Collumn Names
