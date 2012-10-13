@@ -9,6 +9,10 @@ require_once('functions.php');
 srer_auth();
 $Data=new DB();
 SetCurrForm();
+if($_SESSION['ACNo']=="")
+	$_SESSION['ACNo']="-- Choose --";
+if($_SESSION['PartID']=="")
+	$_SESSION['PartID']="-- Choose --";
 if (intval($_POST['PartID'])>0)
 	$_SESSION['PartID']=intval($_POST['PartID']);
 if($_POST['ACNo']!="")
@@ -65,35 +69,52 @@ $(function() {
 <hr/>
 <form name="frmSRER" method="post" action="<?php htmlspecialchars($_SERVER['PHP_SELF'])?>">
     <label for="textfield">AC No.:</label>
-    <select name="ACNo">
+    <select name="ACNo" onChange="document.frmSRER.submit();">
       <?php
-		  $Query="select ACNo,ACNo from SRER_PartMap Where PartMapID=".$_SESSION['PartMapID']." group by ACNo";
-		  $Data->show_sel('ACNo','ACNo',$Query,$_SESSION['ACNo']);
+		if($_SESSION['UserName']=="Admin")
+			$Query="select ACNo,ACNo from SRER_PartMap group by ACNo";
+		else
+			$Query="select ACNo,ACNo from SRER_PartMap Where PartMapID={$_SESSION['PartMapID']} group by ACNo";
+		$Data->show_sel('ACNo','ACNo',$Query,$_SESSION['ACNo']);
 	  ?>
     </select>
 	<label for="textfield">Part No.:</label>
     <select name="PartID">
       <?php
-		  $Query="Select PartID,CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where ACNo='".$_SESSION['ACNo']."' and PartMapID=".$_SESSION['PartMapID']." group by PartNo";
-		  $Data->show_sel('PartID','PartName',$Query,$_SESSION['PartID']);
+		if($_SESSION['UserName']=="Admin")
+			$Query="Select PartID,CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where ACNo='".$_SESSION['ACNo']."' group by PartNo";
+		else
+			$Query="Select PartID,CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where ACNo='".$_SESSION['ACNo']."' and PartMapID=".$_SESSION['PartMapID']." group by PartNo";
+		$Data->show_sel('PartID','PartName',$Query,$_SESSION['PartID']);
 	  ?>
     </select>
 	<input type="submit" name="CmdSubmit" value="Refresh" />
 	<?php //echo $Query; ?>
     <br /><hr />
-    <label for="SlFrom">Display 10 records Starting From Serial No.:</label>
-    <input type="text" name="SlFrom" size="3" value="<?php 
-		//echo isset($_POST['SlFrom'])?htmlspecialchars($_POST['SlFrom']):"";
-		$RowCount=$Data->do_max_query("Select count(*) from {$_SESSION['TableName']} Where PartID={$_SESSION['PartID']}");
-		$RowCount=$RowCount-9;
-		echo (($RowCount>0)?$RowCount:1);
-		?>"/>
+	<?php
+		if((intval($_SESSION['PartID'])>0) && ($_SESSION['TableName']!=""))
+		{	
+			$RowCount=$Data->do_max_query("Select count(*) from {$_SESSION['TableName']} Where PartID={$_SESSION['PartID']}");
+			$RowCount=$RowCount-9;
+			if($RowCount<1)
+			$RowCount=1;
+		}
+		if(intval($_SESSION['PartID'])>0)
+		{
+	?>
+    <label for="SlFrom">From Serial No.:</label>
+    <input type="text" name="SlFrom" size="3" value="<?php echo $RowCount; ?>"/>
     <input type="submit" name="FormName" value="Form 6" />
 	<input type="submit" name="FormName" value="Form 6A" />
 	<input type="submit" name="FormName" value="Form 7" />
 	<input type="submit" name="FormName" value="Form 8" />
 	<input type="submit" name="FormName" value="Form 8A" />
     <hr /><br />
+	<?php 
+			$PartName=GetPartName();
+			echo "<h3>Selected Part[{$PartName}] {$_SESSION['FormName']}</h3>";
+		}
+	?>
 </form>
 <?php 
 if($_SESSION['TableName']!="")
@@ -101,7 +122,6 @@ if($_SESSION['TableName']!="")
 	$Query="Select {$_SESSION['Fields']} from {$_SESSION['TableName']} Where PartID={$_SESSION['PartID']}";
 	EditForm($Query);
 }
-//echo $Query;
 ?>
 <br />
 </div>
