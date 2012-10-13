@@ -20,7 +20,6 @@ function initSRER()
 	}	
 	return;
 }
-
 function SetCurrForm()
 {
 	Switch($_POST['FormName'])
@@ -188,20 +187,16 @@ function EditForm($QueryString)
 	$Data->do_sel_query($QueryString);
 	//Print Collumn Names
 	$i=0;
-	$Fields=new DB();
-	$PartName=$Fields->do_max_query("Select CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where PartID=".$_SESSION['PartID']);
-	echo "<h3>Part[{$PartName}] \"{$_SESSION['FormName']}\"</h3>Total Records: {$TotalRows}";
+	echo "Total Records: {$TotalRows}";
 	echo '<tr><td colspan="'.$TotalCols.'" style="background-color:#F4A460;"></td></tr><tr>';
 	
 	while ($i<$TotalCols)
 	{
-		echo '<th>'.$Fields->do_max_query("Select Description from SRER_FieldNames where FieldName='".mysql_field_name($Data->result,$i)."'").'</th>';
+		echo '<th>'.GetColHead(mysql_field_name($Data->result,$i)).'</th>';
 		$i++;
 		if (($i%$RowBreak)==0 && $i>1)
 				echo '</tr><tr>';
 	}
-	$Fields->do_close();
-	unset($Fields);
 	echo '</tr><tr><td colspan="'.$TotalCols.'" style="background-color:#F4A460;"></td></tr>';
 	//Print Rows
 	$odd="";
@@ -239,7 +234,6 @@ function EditForm($QueryString)
 		.'<input type="submit" name="AddNew" value="New Rows" />';
 	echo '&nbsp;&nbsp;&nbsp;<input style="width:80px;" type="submit" value="Save" /></td></tr></table></form>'; 
 }
-
 function ShowSRER($QueryString)
 { 
 	// Connecting, selecting database 
@@ -249,16 +243,13 @@ function ShowSRER($QueryString)
 	// Printing results in HTML 
 	echo '<table rules="all" frame="box" width="100%" cellpadding="5" cellspacing="1">'; 
 	$i=0;
-	$Fields=new DB();
-	$PartName=$Fields->do_max_query("Select CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where PartID=".$_SESSION['PartID']);
+	
 	echo "Total Records: {$TotalRows}<br />";
 	while ($i<$TotalCols)
 	{
-		echo '<th style="text-align:center;">'.$Fields->do_max_query("Select Description from SRER_FieldNames where FieldName='".mysql_field_name($Data->result,$i)."'").'</th>';
+		echo '<th style="text-align:center;">'.GetColHead(mysql_field_name($Data->result,$i)).'</th>';
 		$i++;
 	}
-	$Fields->do_close();
-	unset($Fields);
 	$i=0;
 	while ($line = mysql_fetch_array($Data->result, MYSQL_ASSOC)) 
 	{   
@@ -271,9 +262,26 @@ function ShowSRER($QueryString)
 		$i++;
 	} 
 	echo "</table>\n"; 
-	// Free resultset 
-	$Data->do_close();
 	unset($Data);
 	return ($i);
+}
+function GetPartName()
+{
+	if(intval($_SESSION['PartID'])>0)
+	{
+		$Fields=new DB();
+		$PartName=$Fields->do_max_query("Select CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where PartID=".$_SESSION['PartID']);
+		$Fields->do_close();
+		unset($Fields);
+	}
+	return ($PartName);
+}
+function GetColHead($ColName)
+{
+	$Fields=new DB();
+	$ColHead=$Fields->do_max_query("Select Description from SRER_FieldNames where FieldName='{$ColName}'");
+	$Fields->do_close();
+	unset($Fields);
+	return ($ColHead);
 }
 ?>
