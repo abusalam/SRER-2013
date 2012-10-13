@@ -63,11 +63,10 @@ if($_SESSION['UserName']!="")
 <h2>Summary Revision of Electoral Roll 2013</h2>
 <?php 
 echo "<h3>Users Activity</h3>";
-$Query="Select `UserName`,`LoginCount`,DATE_FORMAT(`LastLoginTime`+37800,'%d-%m-%Y %H:%i:%s') as LastLoginTime from SRER_Users order by LastLoginTime desc";
+$Query="Select `UserName`,`LoginCount`,CONVERT_TZ(`LastLoginTime`,'+00:00','+05:30') as LastLoginTime from SRER_Users order by LastLoginTime desc";
 ShowSRER($Query);
 //echo $Query;
 ?>
-<br />
 </div>
 <div class="pageinfo"><?php pageinfo(); ?></div>
 <div class="footer"><?php footerinfo();?></div>
