@@ -8,9 +8,6 @@ function initSRER()
 	setcookie("SRER_TOKEN",$sess_id,(time()+(LifeTime*60)));
 	$_SESSION['SRER_TOKEN']=$sess_id;
 	$_SESSION['LifeTime']=time();
-	echo '<?xml version="1.0" encoding="UTF-8"?>';
-	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">';
-	echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >';
 	$t=(isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:"");
 	$reg=new DB();				
 	$reg->do_ins_query("INSERT INTO visitors(ip,vpage,uagent,referrer) values"		
@@ -23,6 +20,7 @@ function initSRER()
 	}	
 	return;
 }
+
 function SetCurrForm()
 {
 	Switch($_POST['FormName'])
@@ -53,7 +51,7 @@ function SetCurrForm()
 }
 function CheckSessSRER()
 {
-	$_SESSION['Debug']=$_SESSION['Debug']."InCheckSESS";
+	$_SESSION['Debug']=$_SESSION['Debug']."CheckSessSRER";
     if((!isset($_SESSION['UserName'])) && (!isset($_SESSION['PartMapID'])))
 	{
 		return "Browsing";
@@ -82,8 +80,9 @@ function srer_auth()
 	$_SESSION['Debug']=$_SESSION['Debug']."InSRER_AUTH";
     $SessRet=CheckSessSRER();
 	$reg=new DB();
+	$reg->do_max_query("Select 1");
 	if($_REQUEST['NoAuth'])
-		initpage();
+		initSRER();
 	else
 	{
 		if($SessRet!="Valid")
@@ -96,13 +95,13 @@ function srer_auth()
 			session_destroy();
 			session_start();
 			$_SESSION=array();
-			$_SESSION['Debug']=$_SESSION['Debug']."LMS_AUTH-!Valid";
+			$_SESSION['Debug']=$_SESSION['Debug'].$SessRet."SRER_TOKEN-!Valid";
 			header("Location: index.php");
 			exit;
         }
         else
         {
-			$_SESSION['Debug']=$_SESSION['Debug']."LMS_AUTH-IsValid";
+			$_SESSION['Debug']=$_SESSION['Debug']."SRER_TOKEN-IsValid";
 			$sess_id=md5(microtime());
 			setcookie("SRER_TOKEN",$sess_id,(time()+(LifeTime*60)));
 			$_SESSION['SRER_TOKEN']=$sess_id;
@@ -182,14 +181,16 @@ function EditForm($QueryString)
 			unset($DBUpdt);
 		}
 	}
-	$TotalRows=$Data->do_sel_query($QueryString);
-	$QueryString=$QueryString." LIMIT ".(($TotalRows-10)>0?($TotalRows-10):0).",10";
+	$EditRows=$TotalRows-9;		
+	if(intval($_SESSION['PartID'])>0)
+		$EditRows=(intval($_POST['SlFrom'])>0)?(intval($_POST['SlFrom'])-1):$EditRows;
+	$QueryString=$QueryString." LIMIT ".(($EditRows>0)?$EditRows:0).",10";
 	$Data->do_sel_query($QueryString);
 	//Print Collumn Names
 	$i=0;
 	$Fields=new DB();
 	$PartName=$Fields->do_max_query("Select CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where PartID=".$_SESSION['PartID']);
-	echo "<h3>Total Records in {$_SESSION['FormName']}: {$TotalRows}</h3>";
+	echo "<h3>Part[{$PartName}] \"{$_SESSION['FormName']}\"</h3>Total Records: {$TotalRows}";
 	echo '<tr><td colspan="'.$TotalCols.'" style="background-color:#F4A460;"></td></tr><tr>';
 	
 	while ($i<$TotalCols)
