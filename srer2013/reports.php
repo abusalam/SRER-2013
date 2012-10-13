@@ -1,4 +1,5 @@
-<?php 
+<?php
+ini_set('display_errors', '1');
 require_once('MyPDF.php');
 if($_SERVER['PHP_SELF']=='/srer2013/reports.php')
 	include('ShowPDF.php'); 
@@ -9,6 +10,10 @@ else
 	initSRER();
 $Data=new DB();
 SetCurrForm();
+if($_SESSION['ACNo']=="")
+	$_SESSION['ACNo']="-- Choose --";
+if(($_SESSION['PartID']=="") || ($_SESSION['ACNo']!=$_POST['ACNo']))
+	$_SESSION['PartID']="-- Choose --";
 if (intval($_POST['PartID'])>0)
 	$_SESSION['PartID']=intval($_POST['PartID']);
 if($_POST['ACNo']!="")
@@ -68,7 +73,7 @@ if($_SESSION['UserName']!="")
 <hr/>
 <form name="frmSRER" method="post" action="<?php htmlspecialchars($_SERVER['PHP_SELF'])?>">
     <label for="textfield">AC No.:</label>
-    <select name="ACNo">
+    <select name="ACNo" onChange="document.frmSRER.submit();">
       <?php
 		  $Query="select ACNo,ACNo from SRER_PartMap group by ACNo";
 		  $Data->show_sel('ACNo','ACNo',$Query,$_SESSION['ACNo']);
@@ -81,25 +86,29 @@ if($_SESSION['UserName']!="")
 		  $Data->show_sel('PartID','PartName',$Query,$_SESSION['PartID']);
 	  ?>
     </select>
-	<input type="submit" name="CmdSubmit" value="Refresh" />
 	<?php //echo $Query; ?>
-    <br /><hr />
-    <label for="SlFrom">Part No. From:</label>
-    <input type="text" name="SlFrom" size="3" value="<?php echo isset($_POST['SlFrom'])?htmlspecialchars($_POST['SlFrom']):"";?>"/>
-	<label for="SlTo">To:</label>
-	<input type="text" name="SlTo" size="3" value="<?php echo isset($_POST['SlTo'])?htmlspecialchars($_POST['SlTo']):"";?>"/>
-    <input type="submit" name="FormName" value="Form 6" />
-	<input type="submit" name="FormName" value="Form 6A" />
-	<input type="submit" name="FormName" value="Form 7" />
-	<input type="submit" name="FormName" value="Form 8" />
-	<input type="submit" name="FormName" value="Form 8A" />
+	<input type="submit" name="FormName" value="Refresh" />
     <hr /><br />
 </form>
 <?php 
-echo "<h3>".$_POST['FormName']."</h3>";
-$Query="Select {$_SESSION['Fields']} from {$_SESSION['TableName']} Where PartID={$_SESSION['PartID']}";
-if($_SESSION['TableName']!="")
+if(intval($_SESSION['PartID'])>0)
+{
+	echo "<h3>Form 6</h3>";
+	$Query="Select `SlNo`, `ReceiptDate`, `AppName`, `RelationshipName`, `Relationship`, `Status` from SRER_Form6 Where PartID={$_SESSION['PartID']}";
 	ShowSRER($Query);
+	echo "<h3>Form 6A</h3>";
+	$Query="Select `SlNo`, `ReceiptDate`, `AppName`, `RelationshipName`, `Relationship`, `Status` from SRER_Form6A Where PartID={$_SESSION['PartID']}";
+	ShowSRER($Query);
+	echo "<h3>Form 7</h3>";
+	$Query="Select `SlNo`, `ReceiptDate`, `ObjectorName`, `PartNo`, `SerialNoInPart`, `DelPersonName`, `ObjectReason`, `Status` from SRER_Form7 Where PartID={$_SESSION['PartID']}";
+	ShowSRER($Query);
+	echo "<h3>Form 8</h3>";
+	$Query="Select `SlNo`, `ReceiptDate`, `AppName`, `RelationshipName`, `Relationship`, `Status` from SRER_Form8 Where PartID={$_SESSION['PartID']}";
+	ShowSRER($Query);
+	echo "<h3>Form 8A</h3>";
+	$Query="Select `SlNo`, `ReceiptDate`, `AppName`, `RelationshipName`, `Relationship`, `Status` from SRER_Form8A Where PartID={$_SESSION['PartID']}";
+	ShowSRER($Query);
+}
 //echo $Query;
 ?>
 <br />
