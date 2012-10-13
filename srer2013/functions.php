@@ -180,7 +180,7 @@ function EditForm($QueryString)
 			unset($DBUpdt);
 		}
 	}
-	$EditRows=$TotalRows-9;		
+	$EditRows=$TotalRows-10;		
 	if(intval($_SESSION['PartID'])>0)
 		$EditRows=(intval($_POST['SlFrom'])>0)?(intval($_POST['SlFrom'])-1):$EditRows;
 	$QueryString=$QueryString." LIMIT ".(($EditRows>0)?$EditRows:0).",10";
