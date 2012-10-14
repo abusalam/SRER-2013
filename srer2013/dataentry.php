@@ -67,20 +67,14 @@ $(function() {
     <label for="textfield">AC No.:</label>
     <select name="ACNo" onChange="document.frmSRER.submit();">
       <?php
-		if($_SESSION['UserName']=="Admin")
-			$Query="select ACNo,ACNo from SRER_PartMap group by ACNo";
-		else
-			$Query="select ACNo,ACNo from SRER_PartMap Where PartMapID={$_SESSION['PartMapID']} group by ACNo";
+		$Query="select ACNo,ACNo from SRER_PartMap Where PartMapID={$_SESSION['PartMapID']} group by ACNo";
 		$Data->show_sel('ACNo','ACNo',$Query,$_SESSION['ACNo']);
 	  ?>
     </select>
 	<label for="textfield">Part No.:</label>
     <select name="PartID">
       <?php
-		if($_SESSION['UserName']=="Admin")
-			$Query="Select PartID,CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where ACNo='".$_SESSION['ACNo']."' group by PartNo";
-		else
-			$Query="Select PartID,CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where ACNo='".$_SESSION['ACNo']."' and PartMapID=".$_SESSION['PartMapID']." group by PartNo";
+		$Query="Select PartID,CONCAT(PartNo,'-',PartName) as PartName from SRER_PartMap where ACNo='".$_SESSION['ACNo']."' and PartMapID=".$_SESSION['PartMapID']." group by PartNo";
 		$Data->show_sel('PartID','PartName',$Query,$_SESSION['PartID']);
 	  ?>
     </select>

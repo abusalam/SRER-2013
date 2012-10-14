@@ -79,20 +79,20 @@ class DB {
 	}
 	public function GetFieldName($ColPos)
 	{
-		if(mysql_errno($this->conn))
+		if(mysql_errno())
 			return "ERROR!";
 		else if($this->ColCount>$ColPos)
-			return mysql_field_name($this->result,$ColPos)
+			return mysql_field_name($this->result,$ColPos);
 		else
 			return "Offset Error!";
 	}
 	
 	public function GetTableName($ColPos)
 	{
-		if(mysql_errno($this->conn))
+		if(mysql_errno())
 			return "ERROR!";
 		else if($this->ColCount>$ColPos)
-			return mysql_field_table($this->result,$ColPos)
+			return mysql_field_table($this->result,$ColPos);
 		else
 			return "Offset Error!";
 	}	

@@ -61,14 +61,48 @@ if($_SESSION['UserName']!="")
 </div>
 <div class="content" style="margin-left:5px;margin-right:5px;">
 <h2>Summary Revision of Electoral Roll 2013</h2>
-<?php 
-echo "<h3>Users Activity</h3>";
-$Query="Select `UserName`,`LoginCount`,CONVERT_TZ(`LastLoginTime`,'+00:00','+05:30') as LastLoginTime,"
-		."CONVERT_TZ(L.`AccessTime`,'+00:00','+05:30') as LastAccessTime,Li.`IP`,Li.`Action`"
-		." from SRER_Users U,(Select UserID,max(`AccessTime`) as AccessTime,max(LogID) as MaxLogID from SRER_logs Group by UserID ) L"
-		.", SRER_logs Li"
-		." where UserName=L.UserID AND L.MaxLogID=Li.LogID order by LastLoginTime desc";
-ShowSRER($Query);
+<hr />
+<form name="frmSRER" method="post" action="<?php htmlspecialchars($_SERVER['PHP_SELF'])?>">
+	<input type="submit" name="FormName" value="User Activity" />
+	<input type="submit" name="FormName" value="Data Entry Status" />
+    <hr /><br />
+</form>
+<?php
+if($_POST['FormName']!="")
+	$_SESSION['AdminView']=htmlspecialchars($_POST['FormName']);
+echo "<h3>{$_SESSION['AdminView']}</h3>";
+Switch($_SESSION['AdminView'])
+{
+	case 'User Activity':
+		$Query="Select `UserName`,`LoginCount`,CONVERT_TZ(`LastLoginTime`,'+00:00','+05:30') as LastLoginTime,"
+			."CONVERT_TZ(L.`AccessTime`,'+00:00','+05:30') as LastAccessTime,Li.`IP`,Li.`Action`"
+			." from SRER_Users U,(Select UserID,max(`AccessTime`) as AccessTime,max(LogID) as MaxLogID from SRER_logs Group by UserID ) L"
+			.", SRER_logs Li"
+			." where UserName=L.UserID AND L.MaxLogID=Li.LogID order by LastLoginTime desc";
+		ShowSRER($Query);
+	break;
+	case 'Data Entry Status':
+		$Query="SELECT ACNo,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
+		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A "
+		."FROM SRER_PartMap P LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6 FROM `SRER_Form6` GROUP BY PartID) F6 "
+		."ON (F6.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6A FROM `SRER_Form6A` GROUP BY PartID) F6A "
+		."ON (F6A.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF7 FROM `SRER_Form7` GROUP BY PartID) F7 "
+		."ON (F7.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8 FROM `SRER_Form8` GROUP BY PartID) F8 "
+		."ON (F8.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8A FROM `SRER_Form8A` GROUP BY PartID) F8A "
+		."ON (F8A.PartID=P.PartID) GROUP BY ACNo";
+		ShowSRER($Query);
+		//echo $Query;
+		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
+			." FROM ({$Query}) as T";
+		ShowSRER($Query);
+		//echo $Query;
+	break;
+}
 ?>
 </div>
 <div class="pageinfo"><?php pageinfo(); ?></div>
