@@ -69,7 +69,6 @@ $Query="Select `UserName`,`LoginCount`,CONVERT_TZ(`LastLoginTime`,'+00:00','+05:
 		.", SRER_logs Li"
 		." where UserName=L.UserID AND L.MaxLogID=Li.LogID order by LastLoginTime desc";
 ShowSRER($Query);
-//echo $Query;
 ?>
 </div>
 <div class="pageinfo"><?php pageinfo(); ?></div>

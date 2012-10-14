@@ -87,7 +87,7 @@ if($_SESSION['UserName']!="")
 	  ?>
     </select>
 	<?php //echo $Query; ?>
-	<input type="submit" name="FormName" value="Refresh" />
+	<input type="submit" name="FormName" value="Show" />
     <hr /><br />
 </form>
 <?php 

@@ -87,9 +87,9 @@ function srer_auth()
 		if($SessRet!="Valid")
         {
 			$reg->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"
-                    ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($t)."','".$_SERVER['HTTP_USER_AGENT']
-                    ."','".$_SESSION['UserName']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','".$SessRet.": ("
-                    .$_SERVER['SCRIPT_NAME'].")','".mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'])."');");    
+                    ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".$reg->SqlSafe($t)."','".$_SERVER['HTTP_USER_AGENT']
+                    ."','".$_SESSION['UserName']."','".$reg->SqlSafe($_SERVER['PHP_SELF'])."','".$SessRet.": ("
+                    .$_SERVER['SCRIPT_NAME'].")','".$reg->SqlSafe($_SERVER['REQUEST_METHOD'])."','".$reg->SqlSafe($_SERVER['REQUEST_URI'])."');");    
 			session_unset();
 			session_destroy();
 			session_start();
@@ -113,9 +113,9 @@ function srer_auth()
                     ."('".$_SERVER['REMOTE_ADDR']."','".htmlspecialchars($_SERVER['PHP_SELF'])."','".$_SERVER['HTTP_USER_AGENT']
                     ."','<".$t.">');");
 			$LogQuery="INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
-                    ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($t)."','".$_SERVER['HTTP_USER_AGENT']
-                    ."','".$_SESSION['UserName']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','Process (".$_SERVER['SCRIPT_NAME'].")','"
-                    .mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'])."');";
+                    ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".$reg->SqlSafe($t)."','".$_SERVER['HTTP_USER_AGENT']
+                    ."','".$_SESSION['UserName']."','".$reg->SqlSafe($_SERVER['PHP_SELF'])."','Process (".$_SERVER['SCRIPT_NAME'].")','"
+                    .$reg->SqlSafe($_SERVER['REQUEST_METHOD'])."','".$reg->SqlSafe($_SERVER['REQUEST_URI'])."');";
             $reg->do_ins_query($LogQuery);
         }
 	}
@@ -138,7 +138,7 @@ function EditForm($QueryString)
 		.'"><table rules="all" frame="box" width="100%" cellpadding="5" cellspacing="1">';
 	//Update Table Data
 	$col=1;
-	$TotalCols=mysql_num_fields($Data->result);
+	$TotalCols=$Data->ColCount;
 	if($_POST['AddNew']=="New Rows")
 	{
 		$i=0;
@@ -159,19 +159,19 @@ function EditForm($QueryString)
 	}
 	else
 	{
-		if(isset($_POST[mysql_field_name($Data->result,$col)]))
+		if(isset($_POST[$Data->GetFieldName($col)]))
 		{
 			$DBUpdt=new DB();
 			while ($col<$TotalCols)
 			{
 				$row=0;
-				//echo $row.",".$col."--".mysql_field_name($Data->result,$col)."--".mysql_field_table($Data->result,$col)
-				//	.$_POST[mysql_field_name($Data->result,$col)][$row];
-				while($row<count($_POST[mysql_field_name($Data->result,$col)]))
+				//echo $row.",".$col."--".$Data->GetFieldName($col)."--".$Data->GetTableName($col)
+				//	.$_POST[$Data->GetFieldName($col)][$row];
+				while($row<count($_POST[$Data->GetFieldName($col)]))
 				{
-					$Query="Update ".mysql_field_table($Data->result,$col)
-						." Set ".mysql_field_name($Data->result,$col)."='".mysql_real_escape_string($_POST[mysql_field_name($Data->result,$col)][$row])."'"
-						." Where ".mysql_field_name($Data->result,0)."=".mysql_real_escape_string($_POST[mysql_field_name($Data->result,0)][$row])." AND PartID=".$_SESSION['PartID']." LIMIT 1;";
+					$Query="Update ".$Data->GetTableName($col)
+						." Set ".$Data->GetFieldName($col)."='".$DBUpdt->SqlSafe($_POST[$Data->GetFieldName($col)][$row])."'"
+						." Where ".$Data->GetFieldName(0)."=".$DBUpdt->SqlSafe($_POST[$Data->GetFieldName(0)][$row])." AND PartID=".$_SESSION['PartID']." LIMIT 1;";
 					//echo $Query."<br />";
 					$DBUpdt->do_ins_query($Query);
 					$row++;
@@ -195,7 +195,7 @@ function EditForm($QueryString)
 	
 	while ($i<$TotalCols)
 	{
-		echo '<th>'.GetColHead(mysql_field_name($Data->result,$i)).'</th>';
+		echo '<th>'.GetColHead($Data->GetFieldName($i)).'</th>';
 		$i++;
 		if (($i%$RowBreak)==0 && $i>1)
 				echo '</tr><tr>';
@@ -204,7 +204,7 @@ function EditForm($QueryString)
 	//Print Rows
 	$odd="";
 	$RecCount=0;
-	while ($line = mysql_fetch_array($Data->result, MYSQL_ASSOC)) 
+	while ($line = $Data->get_row()) 
 	{   
 		$RecCount++;
 		$odd=$odd==""?"odd":"";
@@ -226,7 +226,7 @@ function EditForm($QueryString)
 				$allow='';
 			echo '<input '.$allow.' type="text"';
 				//size="'.((mysql_field_len($Data->result,$i)>40)?40:mysql_field_len($Data->result,$i)).'"
-			echo ' name="'.mysql_field_name($Data->result,$i).'[]" value="'.htmlspecialchars($col_value).'" /> </td>';     
+			echo ' name="'.$Data->GetFieldName($i).'[]" value="'.htmlspecialchars($col_value).'" /> </td>';     
 			$i++;
 		}   
 		echo '</tr><tr><td colspan="'.$TotalCols.'" style="background-color:#F4A460;"></td></tr>'; 
@@ -242,7 +242,7 @@ function ShowSRER($QueryString)
 	// Connecting, selecting database 
 	$Data=new DB();
 	$TotalRows=$Data->do_sel_query($QueryString);  
-	$TotalCols=mysql_num_fields($Data->result);
+	$TotalCols=$Data->ColCount;
 	// Printing results in HTML 
 	echo '<table rules="all" frame="box" width="100%" cellpadding="5" cellspacing="1">'; 
 	$i=0;
@@ -250,11 +250,11 @@ function ShowSRER($QueryString)
 	echo "Total Records: {$TotalRows}<br />";
 	while ($i<$TotalCols)
 	{
-		echo '<th style="text-align:center;">'.GetColHead(mysql_field_name($Data->result,$i)).'</th>';
+		echo '<th style="text-align:center;">'.GetColHead($Data->GetFieldName($i)).'</th>';
 		$i++;
 	}
 	$i=0;
-	while ($line = mysql_fetch_array($Data->result, MYSQL_ASSOC)) 
+	while ($line = $Data->get_row()) 
 	{   
 		echo "\t<tr>\n";   
 		foreach ($line as $col_value)

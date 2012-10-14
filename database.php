@@ -10,7 +10,9 @@ class DB {
 	public $result;
 	public $Debug;
 	public $RowCount;
+	public $ColCount;
 	private $NoResult;
+	
 	private function do_connect()
 	{
 		//$this->Debug=1;
@@ -22,6 +24,11 @@ class DB {
 		//mysql_select_db('damncool_BSKP') or die('Cannot select database');
 		mysql_select_db(MySQL_DB) or die('Cannot select database (database.php): '.mysql_error()."<br><br>");
 		$this->NoResult=1;
+	}
+	public function SqlSafe($StrValue)
+	{
+		$this->do_connect();
+		return mysql_real_escape_string($StrValue);
 	}
 	public function do_ins_query($querystr)
 	{
@@ -45,7 +52,7 @@ class DB {
 	{
 		$this->do_connect();
 		$this->result = mysql_query($querystr,$this->conn);
-		if (!$this->result)
+		if (mysql_errno($this->conn))
 		{
 			if($this->Debug)
 				echo mysql_error($this->conn);
@@ -55,9 +62,10 @@ class DB {
 		}
 		$this->NoResult=0;
 		$this->RowCount=mysql_num_rows($this->result);
+		$this->ColCount=mysql_num_fields($this->result);
 		return $this->RowCount;
 	}
-
+	
 	public function get_row()
 	{
 		if(!$this->NoResult)
@@ -69,7 +77,25 @@ class DB {
 		if (!$this->NoResult)
 			return mysql_fetch_row($this->result);
 	}
+	public function GetFieldName($ColPos)
+	{
+		if(mysql_errno($this->conn))
+			return "ERROR!";
+		else if($this->ColCount>$ColPos)
+			return mysql_field_name($this->result,$ColPos)
+		else
+			return "Offset Error!";
+	}
 	
+	public function GetTableName($ColPos)
+	{
+		if(mysql_errno($this->conn))
+			return "ERROR!";
+		else if($this->ColCount>$ColPos)
+			return mysql_field_table($this->result,$ColPos)
+		else
+			return "Offset Error!";
+	}	
 	public function show_sel($val,$txt,$query,$sel_val="-- Choose --")
 	{
 		$this->do_sel_query($query);
