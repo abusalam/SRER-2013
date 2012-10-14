@@ -9,6 +9,7 @@ class DB {
 	public $conn;
 	public $result;
 	public $Debug;
+	public $RowCount;
 	private $NoResult;
 	private function do_connect()
 	{
@@ -31,42 +32,48 @@ class DB {
 			$message = 'Error(database): ' . mysql_error();
   			//$message .= 'Whole query: ' . $querystr."<br>";
 			if($this->Debug)
-				echo $message;	
+				echo $message;
+			$this->RowCount=0;
 			return 0;
 		}
 		$this->NoResult=1;
-		return mysql_affected_rows($this->conn);
+		$this->RowCount=mysql_affected_rows($this->conn);
+		return $this->RowCount;
 	}
 	
 	public function do_sel_query($querystr)
 	{
 		$this->do_connect();
 		$this->result = mysql_query($querystr,$this->conn);
-		if ((mysql_num_rows($this->result)<1) && ($this->Debug))
+		if (!$this->result)
 		{
+			if($this->Debug)
 				echo mysql_error($this->conn);
+			$this->NoResult=1;
+			$this->RowCount=0;
 			return 0;
 		}
 		$this->NoResult=0;
-		return mysql_num_rows($this->result);
+		$this->RowCount=mysql_num_rows($this->result);
+		return $this->RowCount;
 	}
 
 	public function get_row()
 	{
-		if (mysql_num_rows($this->result)>0)
+		if(!$this->NoResult)
 			return mysql_fetch_assoc($this->result);
 	}
 
 	public function get_n_row()
 	{
-		if (mysql_num_rows($this->result)>0)
+		if (!$this->NoResult)
 			return mysql_fetch_row($this->result);
 	}
 	
 	public function show_sel($val,$txt,$query,$sel_val="-- Choose --")
 	{
 		$this->do_sel_query($query);
-		$opt=mysql_num_rows($this->result);
+		$opt=$this->RowCount;
 		if($sel_val=="-- Choose --")
 			echo "<option value=''>-- Choose --</option>";
 		for($i=0;$i<$opt;$i++)
@@ -84,7 +91,7 @@ class DB {
 	public function do_max_query($Query)
 	{
 		$this->do_sel_query($Query);
-		$row= mysql_fetch_row($this->result);
+		$row= $this->get_n_row();
 		//echo "Whole Row: ".$row[0].$row[1];
 		if ($row[0]==null)
 			return 0;
