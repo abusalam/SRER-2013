@@ -1,10 +1,6 @@
 <?php 
-if (!ini_get('display_errors')) 
-{
-    //ini_set('display_errors', '1');
-}
+ini_set('display_errors', '1');
 require_once('../library.php');
-
 require_once('functions.php'); 
 srer_auth();
 $Data=new DB();

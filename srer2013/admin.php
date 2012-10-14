@@ -63,7 +63,11 @@ if($_SESSION['UserName']!="")
 <h2>Summary Revision of Electoral Roll 2013</h2>
 <?php 
 echo "<h3>Users Activity</h3>";
-$Query="Select `UserName`,`LoginCount`,CONVERT_TZ(`LastLoginTime`,'+00:00','+05:30') as LastLoginTime from SRER_Users order by LastLoginTime desc";
+$Query="Select `UserName`,`LoginCount`,CONVERT_TZ(`LastLoginTime`,'+00:00','+05:30') as LastLoginTime,"
+		."CONVERT_TZ(L.`AccessTime`,'+00:00','+05:30') as LastAccessTime,Li.`IP`,Li.`Action`"
+		." from SRER_Users U,(Select UserID,max(`AccessTime`) as AccessTime,max(LogID) as MaxLogID from SRER_logs Group by UserID ) L"
+		.", SRER_logs Li"
+		." where UserName=L.UserID AND L.MaxLogID=Li.LogID order by LastLoginTime desc";
 ShowSRER($Query);
 //echo $Query;
 ?>
