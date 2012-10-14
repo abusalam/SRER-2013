@@ -88,7 +88,7 @@ function srer_auth()
         {
 			$reg->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"
                     ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($t)."','".$_SERVER['HTTP_USER_AGENT']
-                    ."','".$_SESSION['LoggedOfficerID']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','".$SessRet.": ("
+                    ."','".$_SESSION['UserName']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','".$SessRet.": ("
                     .$_SERVER['SCRIPT_NAME'].")','".mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'])."');");    
 			session_unset();
 			session_destroy();
@@ -112,16 +112,19 @@ function srer_auth()
             $reg->do_ins_query("INSERT INTO visitors(ip,vpage,uagent,referrer) values"		
                     ."('".$_SERVER['REMOTE_ADDR']."','".htmlspecialchars($_SERVER['PHP_SELF'])."','".$_SERVER['HTTP_USER_AGENT']
                     ."','<".$t.">');");
-            $reg->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
+			$LogQuery="INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
                     ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($t)."','".$_SERVER['HTTP_USER_AGENT']
-                    ."','".$_SESSION['LoggedOfficerID']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','Process (".$_SERVER['SCRIPT_NAME'].")','"
-                    .mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'])."');");
+                    ."','".$_SESSION['UserName']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','Process (".$_SERVER['SCRIPT_NAME'].")','"
+                    .mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'])."');";
+            $reg->do_ins_query($LogQuery);
         }
 	}
 	if(isset($_REQUEST['show_src']))
 	{
+		echo $LogQuery;
 		if($_REQUEST['show_src']=="me")
 		show_source(substr($_SERVER['PHP_SELF'],1,strlen($_SERVER['PHP_SELF'])));
+		
 	}	
 	return;	
 }
