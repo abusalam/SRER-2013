@@ -100,7 +100,7 @@ Switch($_SESSION['AdminView'])
 		."ON (F8A.PartID=P.PartID) GROUP BY ACNo";
 		ShowSRER($Query);
 		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
-			.",(SUM(CountF6)+SUM(CountF6A)+SUM(CountF7)+SUM(CountF8)+SUM(CountF8A)) as Total FROM ({$Query}) as T";
+			.",SUM(Total) as Total FROM ({$Query}) as T";
 		ShowSRER($Query);
 		break;
 	case 'Block wise Data Entry Status':
@@ -121,7 +121,7 @@ Switch($_SESSION['AdminView'])
 		ShowSRER($Query);
 		//echo $Query;
 		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
-			.",(SUM(CountF6)+SUM(CountF6A)+SUM(CountF7)+SUM(CountF8)+SUM(CountF8A)) as Total FROM ({$Query}) as T";
+			.",SUM(Total) as Total FROM ({$Query}) as T";
 		ShowSRER($Query);
 		//echo $Query;
 	break;
@@ -143,7 +143,7 @@ Switch($_SESSION['AdminView'])
 		ShowSRER($Query);
 		//echo $Query;
 		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
-			.",(SUM(CountF6)+SUM(CountF6A)+SUM(CountF7)+SUM(CountF8)+SUM(CountF8A)) as Total FROM ({$Query}) as T";
+			.",SUM(Total) as Total FROM ({$Query}) as T";
 		ShowSRER($Query);
 		//echo $Query;
 	break;
