@@ -56,10 +56,10 @@ function pageinfo()
  	$visitor_num=$reg->do_max_query("select count(*) from visitors where vpage='".$_SERVER['PHP_SELF']."'");
 	$_SESSION['ptime']=$reg->do_max_query("select max(vtime) from visitors where vpage like '".$_SERVER['PHP_SELF']."'");
 	$_SESSION['LifeTime']=time();
-	echo "<strong > Last Updated On:</strong> &nbsp;&nbsp;".date("l d F Y g:i:s A ",filemtime($strfile))
+	echo "<strong > Last Updated On:</strong> &nbsp;&nbsp;".date("l d F Y g:i:s A ",filemtime($strfile)+(3600*5.5))
 		." IST &nbsp;&nbsp;&nbsp;<b>Your IP: </b>".$_SERVER['REMOTE_ADDR']
 		."&nbsp;&nbsp;&nbsp;<b>Visits:</b>&nbsp;&nbsp;".$visitor_num
-		." <b>Last Visit:</b> ".date(" g:i:s A ",time())
+		." <b>Last Visit:</b> ".date(" g:i:s A ",time()+(3600*5.5))
 		."";
 	$reg->do_close();
 	return;

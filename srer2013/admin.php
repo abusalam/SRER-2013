@@ -64,7 +64,9 @@ if($_SESSION['UserName']!="")
 <hr />
 <form name="frmSRER" method="post" action="<?php htmlspecialchars($_SERVER['PHP_SELF'])?>">
 	<input type="submit" name="FormName" value="User Activity" />
-	<input type="submit" name="FormName" value="Data Entry Status" />
+	<input type="submit" name="FormName" value="AC wise Data Entry Status" />
+	<input type="submit" name="FormName" value="Block wise Data Entry Status" />
+	<input type="submit" name="FormName" value="Block AC wise Data Entry Status" />
     <hr /><br />
 </form>
 <?php
@@ -81,9 +83,10 @@ Switch($_SESSION['AdminView'])
 			." where UserName=L.UserID AND L.MaxLogID=Li.LogID order by LastLoginTime desc";
 		ShowSRER($Query);
 	break;
-	case 'Data Entry Status':
+	case 'AC wise Data Entry Status':
 		$Query="SELECT ACNo,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
-		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A "
+		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A,(IFNULL(SUM(CountF6),0)+IFNULL(SUM(CountF6A),0)+IFNULL(SUM(CountF7),0)+"
+		."IFNULL(SUM(CountF8),0)+IFNULL(SUM(CountF8A),0)) as Total "
 		."FROM SRER_PartMap P LEFT JOIN "
 		."(SELECT PartID,Count(*) as CountF6 FROM `SRER_Form6` GROUP BY PartID) F6 "
 		."ON (F6.PartID=P.PartID) LEFT JOIN "
@@ -96,9 +99,51 @@ Switch($_SESSION['AdminView'])
 		."(SELECT PartID,Count(*) as CountF8A FROM `SRER_Form8A` GROUP BY PartID) F8A "
 		."ON (F8A.PartID=P.PartID) GROUP BY ACNo";
 		ShowSRER($Query);
+		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
+			.",(SUM(CountF6)+SUM(CountF6A)+SUM(CountF7)+SUM(CountF8)+SUM(CountF8A)) as Total FROM ({$Query}) as T";
+		ShowSRER($Query);
+		break;
+	case 'Block wise Data Entry Status':
+		$Query="SELECT UserName,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
+		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A,(IFNULL(SUM(CountF6),0)+IFNULL(SUM(CountF6A),0)+IFNULL(SUM(CountF7),0)+"
+		."IFNULL(SUM(CountF8),0)+IFNULL(SUM(CountF8A),0)) as Total "
+		."FROM SRER_Users U INNER JOIN SRER_PartMap P ON U.PartMapID=P.PartMapID LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6 FROM `SRER_Form6` GROUP BY PartID) F6 "
+		."ON (F6.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6A FROM `SRER_Form6A` GROUP BY PartID) F6A "
+		."ON (F6A.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF7 FROM `SRER_Form7` GROUP BY PartID) F7 "
+		."ON (F7.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8 FROM `SRER_Form8` GROUP BY PartID) F8 "
+		."ON (F8.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8A FROM `SRER_Form8A` GROUP BY PartID) F8A "
+		."ON (F8A.PartID=P.PartID) GROUP BY UserName";
+		ShowSRER($Query);
 		//echo $Query;
 		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
-			." FROM ({$Query}) as T";
+			.",(SUM(CountF6)+SUM(CountF6A)+SUM(CountF7)+SUM(CountF8)+SUM(CountF8A)) as Total FROM ({$Query}) as T";
+		ShowSRER($Query);
+		//echo $Query;
+	break;
+	case 'Block AC wise Data Entry Status':
+		$Query="SELECT UserName,ACNo,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
+		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A,(IFNULL(SUM(CountF6),0)+IFNULL(SUM(CountF6A),0)+IFNULL(SUM(CountF7),0)+"
+		."IFNULL(SUM(CountF8),0)+IFNULL(SUM(CountF8A),0)) as Total "
+		."FROM SRER_Users U INNER JOIN SRER_PartMap P ON U.PartMapID=P.PartMapID LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6 FROM `SRER_Form6` GROUP BY PartID) F6 "
+		."ON (F6.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6A FROM `SRER_Form6A` GROUP BY PartID) F6A "
+		."ON (F6A.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF7 FROM `SRER_Form7` GROUP BY PartID) F7 "
+		."ON (F7.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8 FROM `SRER_Form8` GROUP BY PartID) F8 "
+		."ON (F8.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8A FROM `SRER_Form8A` GROUP BY PartID) F8A "
+		."ON (F8A.PartID=P.PartID) GROUP BY UserName,ACNo";
+		ShowSRER($Query);
+		//echo $Query;
+		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
+			.",(SUM(CountF6)+SUM(CountF6A)+SUM(CountF7)+SUM(CountF8)+SUM(CountF8A)) as Total FROM ({$Query}) as T";
 		ShowSRER($Query);
 		//echo $Query;
 	break;
