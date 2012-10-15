@@ -1,0 +1,11 @@
+
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^paschimmedinipur\.nic\.in$
+RewriteRule (.*) http://www.paschimmedinipur.gov.in/$1 [R=301,L]
+
+RewriteCond %{REQUEST_URI} ^/ERCO2013/
+RewriteRule ^ERCO2013\/([0-9]+)\/([0-9]+)\.pdf$ /srer/ShowPDF.php?ACNo=$1&PartNo=$2
+
+AddType application/x-ms-application application
+AddType application/x-ms-manifest manifest
+AddType application/octet-stream deploy

@@ -1,7 +1,15 @@
 <?php
-if (intval($_POST['PartID'])>0)
+require_once('MyPDF.php');
+session_start();
+$Data=new DB();
+$Query="Select PartID FROM SRER_PartMap where LEFT(ACNo,3)='{$_REQUEST['ACNo']}' AND PartNo=LPAD('{$_REQUEST['PartNo']}',3,'0')";
+$_SESSION['PartID']=$Data->do_max_query($Query);
+$Data->do_close();
+unset($Data);
+//echo $_SESSION['PartID']."<br />".$Query;
+
+if (intval($_SESSION['PartID'])>0)
 {
-	$_SESSION['PartID']=intval($_POST['PartID']);
 	$pdf=new PDF();
 	$_SESSION['TableName']="SRER_Form6";
 	$_SESSION['Fields']="`SlNo`, `ReceiptDate`, `AppName`, `RelationshipName`, `Relationship`, `Status`";
@@ -68,12 +76,12 @@ function ShowPDF($pdf,$SRERForm,$Finish=0)
 	unset($ColHead);
 	$pdf->SetTitle($SRERForm);
 	$pdf->AddPage(); 
-	//$Query="Select '1','2','3','4','5','6','7','8' from visitors limit 200";
+	//$Query="Select '1','2','3','4','5','6','7','8' from visitors limit 20";
 	//$pdf->Write(0,"PartID=[".$_SESSION['PartID']."-".$_POST['PartID']."]");
 	$pdf->Details($Query,0);
 	if($Finish)
 	{
-		$pdf->Output(intval($Data->do_max_query("Select PartNo from SRER_PartMap Where PartID={$_SESSION['PartID']}")).".pdf","D");
+		$pdf->Output($Data->do_max_query("Select CONCAT(`ACNo`,'[',`PartNo`,']-',`PartName`) from SRER_PartMap Where PartID={$_SESSION['PartID']}").".pdf","D");
 		unset($pdf);
 		exit();
 	}
