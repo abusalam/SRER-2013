@@ -285,6 +285,6 @@ function GetColHead($ColName)
 	$ColHead=$Fields->do_max_query("Select Description from SRER_FieldNames where FieldName='{$ColName}'");
 	$Fields->do_close();
 	unset($Fields);
-	return ($ColHead==0?$ColName:$ColHead);
+	return (!$ColHead?$ColName:$ColHead);
 }
 ?>

@@ -111,10 +111,10 @@ if(intval($_SESSION['PartID'])>0)
 }
 if($_SERVER['PHP_SELF']=='/srer2013/reports.php')
 {
-		$Query="SELECT UserName as `Block Name`,ACNo as `AC Name`,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
+		$Query="SELECT ACNo as `AC Name`,PartNo,PartName,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
 		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A,(IFNULL(SUM(CountF6),0)+IFNULL(SUM(CountF6A),0)+IFNULL(SUM(CountF7),0)+"
 		."IFNULL(SUM(CountF8),0)+IFNULL(SUM(CountF8A),0)) as Total "
-		."FROM SRER_Users U INNER JOIN SRER_PartMap P ON U.PartMapID=P.PartMapID LEFT JOIN "
+		."FROM SRER_Users U INNER JOIN SRER_PartMap P ON U.PartMapID=P.PartMapID AND U.PartMapID={$_SESSION['PartMapID']} LEFT JOIN "
 		."(SELECT PartID,Count(*) as CountF6 FROM `SRER_Form6` GROUP BY PartID) F6 "
 		."ON (F6.PartID=P.PartID) LEFT JOIN "
 		."(SELECT PartID,Count(*) as CountF6A FROM `SRER_Form6A` GROUP BY PartID) F6A "
@@ -124,7 +124,7 @@ if($_SERVER['PHP_SELF']=='/srer2013/reports.php')
 		."(SELECT PartID,Count(*) as CountF8 FROM `SRER_Form8` GROUP BY PartID) F8 "
 		."ON (F8.PartID=P.PartID) LEFT JOIN "
 		."(SELECT PartID,Count(*) as CountF8A FROM `SRER_Form8A` GROUP BY PartID) F8A "
-		."ON (F8A.PartID=P.PartID) GROUP BY UserName,ACNo";
+		."ON (F8A.PartID=P.PartID) GROUP BY ACNo,PartNo,PartName";
 		ShowSRER($Query);
 		//echo $Query;
 		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
