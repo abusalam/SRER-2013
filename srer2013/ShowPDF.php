@@ -10,7 +10,7 @@ if (intval($_POST['PartID'])>0)
 		array(20,25,80,80,35,47)
 	);
 	$pdf->cols=$ColWidths;
-	ShowPDF(&$pdf,"Form 6");
+	ShowPDF(&$pdf,"Form 6",1);
 
 	$_SESSION['TableName']="SRER_Form6A";
 	$_SESSION['Fields']="`SlNo`, `ReceiptDate`, `AppName`, `RelationshipName`, `Relationship`, `Status`";
@@ -46,9 +46,9 @@ if (intval($_POST['PartID'])>0)
 		array(20,25,80,80,35,47)
 	);
 	$pdf->cols=$ColWidths;
-	ShowPDF(&$pdf,"Form 8A",1);
+	ShowPDF(&$pdf,"Form 8A",0,1);
 }
-function ShowPDF($pdf,$SRERForm,$Finish=0)
+function ShowPDF($pdf,$SRERForm,$Start=0,$Finish=0)
 {
 	$ColHead=& $pdf->cols[0];
 	$Data=new DB();
@@ -67,7 +67,10 @@ function ShowPDF($pdf,$SRERForm,$Finish=0)
 	unset($Fields);
 	unset($ColHead);
 	$pdf->SetTitle($SRERForm);
-	$pdf->AddPage(); 
+	if($Start)
+		$pdf->AddPage();
+	else
+		$pdf->CustomHeader();
 	//$Query="Select '1','2','3','4','5','6','7','8' from visitors limit 200";
 	//$pdf->Write(0,"PartID=[".$_SESSION['PartID']."-".$_POST['PartID']."]");
 	$pdf->Details($Query,0);

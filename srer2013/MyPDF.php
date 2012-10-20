@@ -16,6 +16,7 @@ public $cols;
 public $fh=3.5;
 private $PrintHeader=true;
 private $query;
+private $CustomHeaderPrinting=false;
 function PDF()
 {
 	$this->FPDF('L');
@@ -46,17 +47,6 @@ function Header()
 		//Line break
 		//$this->Ln();
 		$this->PreHeader();
-		$i=0;
-		$this->SetFont('Arial','B',8);
-		$this->SetLineWidth(0.3);
-		$this->SetColW($this->cols[1]);
-		$row=$this->SplitLn($this->cols[0],0);
-		while($i<count($row))
-		{
-			$this->Wrap($this->colw[$i],$row[$i]);
-			$i++;
-		}
-		$this->Ln();
 	}
 }
 
@@ -161,6 +151,28 @@ function Wrap($w,$s,$b=1,$align='C')
 		$this->Cell($w,$h,str_replace("|",", ",$s),$b,0,$align);
 }
 
+function CustomHeader()
+{
+	if(!$this->CustomHeaderPrinting)
+	{
+		$this->CustomHeaderPrinting=true;
+		$this->SetTextColor(0);
+		$this->SetFont('Arial','B',8);
+		$this->Cell(0,6,$this->title,0,1,"L");
+		$i=0;
+		$this->SetFont('Arial','B',8);
+		$this->SetLineWidth(0.3);
+		$this->SetColW($this->cols[1]);
+		$row=$this->SplitLn($this->cols[0],0);
+		while($i<count($row))
+		{
+			$this->Wrap($this->colw[$i],$row[$i]);
+			$i++;
+		}
+		$this->Ln();
+		$this->CustomHeaderPrinting=false;
+	}
+}
 function Details($Query,$SlNo=1,$lw=0.1,$fw=6)
 {
 	$this->SetFont('Arial','',$fw);
@@ -202,9 +214,9 @@ function PreHeader()
 	$this->SetFont('Arial','B',10);
 	$this->SetTextColor(0);
 	$this->Cell(0,7,"Summary Revision of Electoral Roll 2013",0,1,"C");
-	$this->Cell(0,6,$this->title,0,1,"C");
 	$this->SetFont('Arial','B',8);
 	$this->Cell(0,5,$_SESSION['PartName'],0,1,"C");
+	$this->CustomHeader();
 }
 function PreFooter()
 {
