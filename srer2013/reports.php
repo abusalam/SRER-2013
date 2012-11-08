@@ -111,6 +111,12 @@ if(intval($_SESSION['PartID'])>0)
 }
 if($_SERVER['PHP_SELF']=='/srer2013/reports.php')
 {
+	if((time()-strtotime("02:30:00"))>0) 
+	{ 
+		echo "<h3>Summary Reports will be available at 8:00AM.</h3>";
+	} 
+	else 
+	{
 		$Query="SELECT ACNo as `AC Name`,PartNo,PartName,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
 		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A,(IFNULL(SUM(CountF6),0)+IFNULL(SUM(CountF6A),0)+IFNULL(SUM(CountF7),0)+"
 		."IFNULL(SUM(CountF8),0)+IFNULL(SUM(CountF8A),0)) as Total "
@@ -130,6 +136,7 @@ if($_SERVER['PHP_SELF']=='/srer2013/reports.php')
 		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
 			.",SUM(Total) as Total FROM ({$Query}) as T";
 		ShowSRER($Query);
+	}
 }
 //echo $Query;
 ?>
