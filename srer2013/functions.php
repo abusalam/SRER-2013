@@ -157,6 +157,18 @@ function EditForm($QueryString)
 		$AddNewDB->do_close();
 		unset($AddNewDB);
 	}
+	elseif($_POST['Delete']=="Delete")
+	{
+		$DelDB=new DB();
+		$DelDB->do_max_query("Select 1");
+		for($i=0;$i<count($_POST['RowSelected']);$i++)
+		{
+			$Query="Delete from {$_SESSION['TableName']} Where PartID={$_SESSION['PartID']} AND SlNo=".$_POST['RowSelected'][$i];
+			$DelDB->do_ins_query($Query);
+		}
+		$DelDB->do_close();
+		unset($DelDB);
+	}
 	else
 	{
 		if(isset($_POST[$Data->GetFieldName($col)]))
@@ -234,7 +246,8 @@ function EditForm($QueryString)
 	echo '<tr><td colspan="'.$TotalCols.'" style="text-align:right;">'
 		.'<label for="txtInsRows">Insert:</label>'
 		.'<input type="text" name="txtInsRows" size="3" value="'.(isset($_POST['txtInsRows'])?htmlspecialchars($_POST['txtInsRows']):"1").'"/>'
-		.'<input type="submit" name="AddNew" value="New Rows" />';
+		.'<input type="hidden" name="ShowBlank" value="'.$_POST['ShowBlank'].'" />'
+		.'<input type="submit" name="AddNew" value="New Rows" /><input style="width:80px;" type="submit" name="Delete" value="Delete" />';
 	echo '&nbsp;&nbsp;&nbsp;<input style="width:80px;" type="submit" value="Save" /></td></tr></table></form>'; 
 }
 function ShowSRER($QueryString)

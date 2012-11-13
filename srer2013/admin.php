@@ -67,6 +67,7 @@ if($_SESSION['UserName']!="")
 	<input type="submit" name="FormName" value="AC wise Data Entry Status" />
 	<input type="submit" name="FormName" value="Block wise Data Entry Status" />
 	<input type="submit" name="FormName" value="Block AC wise Data Entry Status" />
+	<input type="submit" name="FormName" value="Block AC wise Blank Records" />
     <hr /><br />
 </form>
 <?php
@@ -139,6 +140,28 @@ Switch($_SESSION['AdminView'])
 		."(SELECT PartID,Count(*) as CountF8 FROM `SRER_Form8` GROUP BY PartID) F8 "
 		."ON (F8.PartID=P.PartID) LEFT JOIN "
 		."(SELECT PartID,Count(*) as CountF8A FROM `SRER_Form8A` GROUP BY PartID) F8A "
+		."ON (F8A.PartID=P.PartID) GROUP BY UserName,ACNo";
+		ShowSRER($Query);
+		//echo $Query;
+		$Query="Select SUM(CountF6) as TotalF6,SUM(CountF6A) as TotalF6A,SUM(CountF7) as TotalF7,SUM(CountF8) as TotalF8,SUM(CountF8A) as TotalF8A"
+			.",SUM(Total) as Total FROM ({$Query}) as T";
+		ShowSRER($Query);
+		//echo $Query;
+	break;
+	case 'Block AC wise Blank Records':
+		$Query="SELECT UserName,ACNo,SUM(CountF6) as CountF6,SUM(CountF6A) as CountF6A,SUM(CountF7) as CountF7,"
+		."SUM(CountF8) as CountF8,SUM(CountF8A) as CountF8A,(IFNULL(SUM(CountF6),0)+IFNULL(SUM(CountF6A),0)+IFNULL(SUM(CountF7),0)+"
+		."IFNULL(SUM(CountF8),0)+IFNULL(SUM(CountF8A),0)) as Total "
+		."FROM SRER_Users U INNER JOIN SRER_PartMap P ON U.PartMapID=P.PartMapID LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6 FROM `SRER_Form6`  where (`ReceiptDate`='' OR `ReceiptDate` IS NULL OR `AppName`='' OR `AppName` IS NULL OR `RelationshipName`='' OR `RelationshipName` IS NULL OR `Relationship`='' OR `Relationship` IS NULL OR `Status`='' OR `Status` IS NULL) GROUP BY PartID) F6 "
+		."ON (F6.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF6A FROM `SRER_Form6A`  where (`ReceiptDate`='' OR `ReceiptDate` IS NULL OR `AppName`='' OR `AppName` IS NULL OR `RelationshipName`='' OR `RelationshipName` IS NULL OR `Relationship`='' OR `Relationship` IS NULL OR `Status`='' OR `Status` IS NULL) GROUP BY PartID) F6A "
+		."ON (F6A.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF7 FROM `SRER_Form7` Where (`ReceiptDate`='' OR `ReceiptDate` IS NULL OR `ObjectorName`='' OR `ObjectorName` IS NULL OR `PartNo`='' OR `PartNo` IS NULL OR `SerialNoInPart`='' OR `SerialNoInPart` IS NULL OR `DelPersonName`='' OR `DelPersonName` IS NULL OR `ObjectReason`='' OR `ObjectReason` IS NULL OR `Status` ='' OR `Status` IS NULL) GROUP BY PartID) F7 "
+		."ON (F7.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8 FROM `SRER_Form8`  where (`ReceiptDate`='' OR `ReceiptDate` IS NULL OR `AppName`='' OR `AppName` IS NULL OR `RelationshipName`='' OR `RelationshipName` IS NULL OR `Relationship`='' OR `Relationship` IS NULL OR `Status`='' OR `Status` IS NULL) GROUP BY PartID) F8 "
+		."ON (F8.PartID=P.PartID) LEFT JOIN "
+		."(SELECT PartID,Count(*) as CountF8A FROM `SRER_Form8A`  where (`ReceiptDate`='' OR `ReceiptDate` IS NULL OR `AppName`='' OR `AppName` IS NULL OR `RelationshipName`='' OR `RelationshipName` IS NULL OR `Relationship`='' OR `Relationship` IS NULL OR `Status`='' OR `Status` IS NULL) GROUP BY PartID) F8A "
 		."ON (F8A.PartID=P.PartID) GROUP BY UserName,ACNo";
 		ShowSRER($Query);
 		//echo $Query;
