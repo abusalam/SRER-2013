@@ -5,50 +5,69 @@ if (!ini_get('display_errors'))
 }
 require_once( '../library.php');
 require_once('functions.php'); 
-initSRER();
-	$Data=new DB();
-	$ID=isset($_SESSION['ID'])?$_SESSION['ID']:"";
-	$_SESSION['ID']=session_id();
-    if(!isset($_SESSION['LifeTime']))
-		$_SESSION['LifeTime']=time();
-    $action=CheckSessSRER();
-	$LogC=0;
-	if (($_POST['UserID']!="") && ($_POST['UserPass']!=""))
+session_start();
+$Data=new DB();
+$Data->Debug=1;
+$Data->do_max_query("Select 1");
+$ID=isset($_SESSION['ID'])?$_SESSION['ID']:"";
+$_SESSION['ID']=session_id();
+if(!isset($_SESSION['LifeTime']))
+	$_SESSION['LifeTime']=time();
+$action=CheckSessSRER();
+if($action=="LogOut")
+{
+	$Data->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"
+            ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".$Data->SqlSafe($t)."','".$_SERVER['HTTP_USER_AGENT']
+            ."','".$_SESSION['UserName']."','".$Data->SqlSafe($_SERVER['PHP_SELF'])."','".$SessRet.": ("
+            .$_SERVER['SCRIPT_NAME'].")','".$Data->SqlSafe($_SERVER['REQUEST_METHOD'])."','".$Data->SqlSafe($_SERVER['REQUEST_URI'])."');");    
+	session_unset();
+	session_destroy();
+	session_start();
+	$_SESSION=array();
+	$_SESSION['Debug']=$_SESSION['Debug'].$SessRet."SRER_TOKEN-!Valid";
+	header("Location: index.php");
+	exit;
+}
+if($action!="Valid")
+{
+	initSRER();
+}
+$LogC=0;
+if (($_POST['UserID']!="") && ($_POST['UserPass']!=""))
+{
+	$QueryLogin="Select PartMapID,UserName from `SRER_Users` where `UserID`='".$_POST['UserID']."' AND MD5(concat(`UserPass`,MD5('".$_POST['LoginToken']."')))='".$_POST['UserPass']."'";
+	$rows=$Data->do_sel_query($QueryLogin);					
+	if($rows>0 )
 	{
-		$QueryLogin="Select PartMapID,UserName from `SRER_Users` where `UserID`='".$_POST['UserID']."' AND MD5(concat(`UserPass`,MD5('".$_POST['LoginToken']."')))='".$_POST['UserPass']."'";
-		$rows=$Data->do_sel_query($QueryLogin);					
-		if($rows>0 )
-		{
-			session_regenerate_id();
-			$Row=$Data->get_row();
-			$_SESSION['UserName']=$Row['UserName'];
-			$_SESSION['PartMapID']=$Row['PartMapID'];
-			$_SESSION['ID']=session_id();
-			$_SESSION['FingerPrint']=md5($_SERVER['REMOTE_ADDR']
-								.$_SERVER['HTTP_USER_AGENT']
-								."KeyLeft");
-			$_SESSION['REFERER1']="http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-			$action="JustLoggedIn";
-			$Data->do_ins_query("Update SRER_Users Set LoginCount=LoginCount+1 where `UserID`='".$_POST['UserID']."' AND MD5(concat(`UserPass`,MD5('".$_POST['LoginToken']."')))='".$_POST['UserPass']."'");
-			$Data->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
-				."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($_SERVER['HTTP_REFERER'])."','".$_SERVER['HTTP_USER_AGENT']
-				."','".$_SESSION['UserName']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','Login: Success','"
-				.mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'].$_SERVER['QUERY_STRING'])."');");
-		}	
-		else
-		{
-			$action="NoAccess";
-			$Data->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
-				."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($_SERVER['HTTP_REFERER'])."','".$_SERVER['HTTP_USER_AGENT']
-				."','".$_POST['UserID']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','Login: Failed','"
-				.mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'].$_SERVER['QUERY_STRING'])."');");
-		}
-		$Query="Select MD5(concat(`Passwd`,MD5('".$_POST['LoginToken']."'))) from SRER_Users where UserID='".$_POST['UserID']."'";
-		$UserPass=$Data->do_max_query($Query);
-		
-	}
-	$_SESSION['Token']=md5($_SERVER['REMOTE_ADDR'].$ID.time());
+		session_regenerate_id();
+		$Row=$Data->get_row();
+		$_SESSION['UserName']=$Row['UserName'];
+		$_SESSION['PartMapID']=$Row['PartMapID'];
+		$_SESSION['ID']=session_id();
+		$_SESSION['FingerPrint']=md5($_SERVER['REMOTE_ADDR']
+							.$_SERVER['HTTP_USER_AGENT']
+							."KeyLeft");
+		$_SESSION['REFERER1']="http://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+		$action="JustLoggedIn";
+		$Data->do_ins_query("Update SRER_Users Set LoginCount=LoginCount+1 where `UserID`='".$_POST['UserID']."' AND MD5(concat(`UserPass`,MD5('".$_POST['LoginToken']."')))='".$_POST['UserPass']."'");
+		$Data->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
+			."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($_SERVER['HTTP_REFERER'])."','".$_SERVER['HTTP_USER_AGENT']
+			."','".$_SESSION['UserName']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','Login: Success','"
+			.mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'].$_SERVER['QUERY_STRING'])."');");
+	}	
+	else
+	{
+		$action="NoAccess";
+		$Data->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
+			."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".mysql_real_escape_string($_SERVER['HTTP_REFERER'])."','".$_SERVER['HTTP_USER_AGENT']
+			."','".$_POST['UserID']."','".mysql_real_escape_string($_SERVER['PHP_SELF'])."','Login: Failed','"
+			.mysql_real_escape_string($_SERVER['REQUEST_METHOD'])."','".mysql_real_escape_string($_SERVER['REQUEST_URI'].$_SERVER['QUERY_STRING'])."');");
+	}		
+}
+$_SESSION['Token']=md5($_SERVER['REMOTE_ADDR'].$ID.time());
+	
 ?>
+
 <head>
 <meta name="robots" content="noarchive">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
@@ -112,6 +131,7 @@ if(($action!="JustLoggedIn") && ($action!="Valid"))
 </form>
 <p><b>Note:</b>Contact System Manager on (9647182926) for User ID and Password.</p>
 <?php 
+//echo $_SESSION['Debug'];
 }
 ?>
 </div>

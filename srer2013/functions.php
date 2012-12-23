@@ -1,7 +1,6 @@
 <?php
 function initSRER()
 {
-	session_start();
 	$sess_id=md5(microtime());
 	
 	$_SESSION['Debug']=$_SESSION['Debug']."InInitPage(".$_SESSION['SRER_TOKEN']."=".$_COOKIE['SRER_TOKEN'].")";
@@ -77,7 +76,7 @@ function srer_auth()
 {
 	session_start();
 	$_SESSION['Debug']=$_SESSION['Debug']."InSRER_AUTH";
-    $SessRet=CheckSessSRER();
+	$SessRet=CheckSessSRER();
 	$reg=new DB();
 	$reg->do_max_query("Select 1");
 	if($_REQUEST['NoAuth'])
@@ -85,11 +84,11 @@ function srer_auth()
 	else
 	{
 		if($SessRet!="Valid")
-        {
+		{
 			$reg->do_ins_query("INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"
-                    ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".$reg->SqlSafe($t)."','".$_SERVER['HTTP_USER_AGENT']
-                    ."','".$_SESSION['UserName']."','".$reg->SqlSafe($_SERVER['PHP_SELF'])."','".$SessRet.": ("
-                    .$_SERVER['SCRIPT_NAME'].")','".$reg->SqlSafe($_SERVER['REQUEST_METHOD'])."','".$reg->SqlSafe($_SERVER['REQUEST_URI'])."');");    
+						."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".$reg->SqlSafe($t)."','".$_SERVER['HTTP_USER_AGENT']
+						."','".$_SESSION['UserName']."','".$reg->SqlSafe($_SERVER['PHP_SELF'])."','".$SessRet.": ("
+						.$_SERVER['SCRIPT_NAME'].")','".$reg->SqlSafe($_SERVER['REQUEST_METHOD'])."','".$reg->SqlSafe($_SERVER['REQUEST_URI'])."');");    
 			session_unset();
 			session_destroy();
 			session_start();
@@ -97,34 +96,30 @@ function srer_auth()
 			$_SESSION['Debug']=$_SESSION['Debug'].$SessRet."SRER_TOKEN-!Valid";
 			header("Location: index.php");
 			exit;
-        }
-        else
-        {
+		}
+		else
+		{
 			$_SESSION['Debug']=$_SESSION['Debug']."SRER_TOKEN-IsValid";
 			$sess_id=md5(microtime());
 			setcookie("SRER_TOKEN",$sess_id,(time()+(LifeTime*60)));
 			$_SESSION['SRER_TOKEN']=$sess_id;
 			$_SESSION['LifeTime']=time();
-            echo '<?xml version="1.0" encoding="UTF-8"?>';
-            echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">';
-            echo '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >';
-            $t=(isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:"");  
-            $reg->do_ins_query("INSERT INTO visitors(ip,vpage,uagent,referrer) values"		
-                    ."('".$_SERVER['REMOTE_ADDR']."','".htmlspecialchars($_SERVER['PHP_SELF'])."','".$_SERVER['HTTP_USER_AGENT']
-                    ."','<".$t.">');");
+			$t=(isset($_SERVER['HTTP_REFERER'])?$_SERVER['HTTP_REFERER']:"");  
+			$reg->do_ins_query("INSERT INTO visitors(ip,vpage,uagent,referrer) values"		
+				."('".$_SERVER['REMOTE_ADDR']."','".htmlspecialchars($_SERVER['PHP_SELF'])."','".$_SERVER['HTTP_USER_AGENT']
+				."','<".$t.">');");
 			$LogQuery="INSERT INTO SRER_logs (`SessionID`,`IP`,`Referrer`,`UserAgent`,`UserID`,`URL`,`Action`,`Method`,`URI`) values"		
-                    ."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".$reg->SqlSafe($t)."','".$_SERVER['HTTP_USER_AGENT']
-                    ."','".$_SESSION['UserName']."','".$reg->SqlSafe($_SERVER['PHP_SELF'])."','Process (".$_SERVER['SCRIPT_NAME'].")','"
-                    .$reg->SqlSafe($_SERVER['REQUEST_METHOD'])."','".$reg->SqlSafe($_SERVER['REQUEST_URI'])."');";
-            $reg->do_ins_query($LogQuery);
-        }
+				."('".$_SESSION['ID']."','".$_SERVER['REMOTE_ADDR']."','".$reg->SqlSafe($t)."','".$_SERVER['HTTP_USER_AGENT']
+				."','".$_SESSION['UserName']."','".$reg->SqlSafe($_SERVER['PHP_SELF'])."','Process (".$_SERVER['SCRIPT_NAME'].")','"
+				.$reg->SqlSafe($_SERVER['REQUEST_METHOD'])."','".$reg->SqlSafe($_SERVER['REQUEST_URI'])."');";
+			$reg->do_ins_query($LogQuery);
+		}
 	}
 	if(isset($_REQUEST['show_src']))
 	{
 		echo $LogQuery;
 		if($_REQUEST['show_src']=="me")
 		show_source(substr($_SERVER['PHP_SELF'],1,strlen($_SERVER['PHP_SELF'])));
-		
 	}	
 	return;	
 }
