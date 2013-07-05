@@ -4,6 +4,9 @@
 	<li class="<?php echo ($_SERVER['PHP_SELF']=='/srer2013/admin.php')?'SelMenuitems':'Menuitems';?>">
 							<a href="http://<?php echo $_SERVER['HTTP_HOST']; ?>/srer2013/admin.php">Home</a></li>
     <li class="Menuitems">|</li>
+    <li class="<?php echo ($_SERVER['PHP_SELF']=='/srer2013/entry.php')?'SelMenuitems':'Menuitems';?>">
+							<a href="http://<?php echo $_SERVER['HTTP_HOST']; ?>/srer2013/entry.php">Entry</a></li>
+    <li class="Menuitems">|</li>
 	<?php }?>
     <li class="<?php echo ($_SERVER['PHP_SELF']=='/srer2013/dataentry.php')?'SelMenuitems':'Menuitems';?>">
 							<a href="http://<?php echo $_SERVER['HTTP_HOST']; ?>/srer2013/dataentry.php">Data Entry</a></li>

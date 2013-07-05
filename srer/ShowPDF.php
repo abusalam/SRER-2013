@@ -2,9 +2,7 @@
 require_once('MyPDF.php');
 session_start();
 $Data=new DB();
-$ACNo=intval($_REQUEST['ACNo']);
-$PartNo=intval($_REQUEST['PartNo']);
-$Query="Select PartID FROM SRER_PartMap where LEFT(ACNo,3)='{$ACNo}' AND PartNo=LPAD('{$PartNo}',3,'0')";
+$Query="Select PartID FROM SRER_PartMap where LEFT(ACNo,3)='{$_REQUEST['ACNo']}' AND PartNo=LPAD('{$_REQUEST['PartNo']}',3,'0')";
 $_SESSION['PartID']=$Data->do_max_query($Query);
 $Data->do_close();
 unset($Data);
